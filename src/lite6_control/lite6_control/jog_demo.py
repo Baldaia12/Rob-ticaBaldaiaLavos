@@ -48,7 +48,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                         help='jog size in radians (default: 0.15 = 8.6 deg)')
     parser.add_argument('--speed', type=float, default=0.2, help='rad/s')
     parser.add_argument('--acc', type=float, default=5.0, help='rad/s^2')
-    parser.add_argument('--namespace', default='ufactory',
+    parser.add_argument('--namespace', default='/ufactory',
                         help='the Lite 6 uses /ufactory, not /xarm')
     parser.add_argument('--dry-run', action='store_true',
                         help='print the plan and the arm state, command nothing')

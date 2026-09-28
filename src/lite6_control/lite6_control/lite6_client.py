@@ -110,17 +110,17 @@ class Lite6Client(Node):
             rclpy.shutdown()
     """
 
-    def __init__(self, namespace: str = 'ufactory', node_name: str = 'lite6_client'):
+    def __init__(self, namespace: str = '', node_name: str = 'lite6_client'):
         super().__init__(node_name)
-        self.ns = namespace.strip('/')
+        self.ns = namespace
 
         self._joint_state: Optional[JointState] = None
         self._robot_state: Optional[RobotMsg] = None
 
         self.create_subscription(
-            JointState, f'/{self.ns}/joint_states', self._on_joint_state, 10)
+            JointState, f'{self.ns}/joint_states', self._on_joint_state, 10)
         self.create_subscription(
-            RobotMsg, f'/{self.ns}/robot_states', self._on_robot_state, 10)
+            RobotMsg, f'{self.ns}/robot_states', self._on_robot_state, 10)
 
         self._srv_cache = {}   # NOTE: not `_clients` - rclpy.Node uses that name internally
 
@@ -136,27 +136,27 @@ class Lite6Client(Node):
         """Call /<ns>/<name> and raise unless the robot reports ret == 0."""
         client = self._srv_cache.get(name)
         if client is None:
-            client = self.create_client(srv_type, f'/{self.ns}/{name}')
+            client = self.create_client(srv_type, f'{self.ns}/{name}')
             self._srv_cache[name] = client
 
         if not client.wait_for_service(timeout_sec=5.0):
             raise Lite6Error(
-                f'service /{self.ns}/{name} is not there. Is the driver running? '
+                f'service {self.ns}/{name} is not there. Is the driver running? '
                 f'Try:  lab driver <robot_ip>')
 
         future = client.call_async(request)
         rclpy.spin_until_future_complete(self, future, timeout_sec=timeout)
 
         if not future.done():
-            raise Lite6Error(f'/{self.ns}/{name} did not answer within {timeout:.0f}s')
+            raise Lite6Error(f'{self.ns}/{name} did not answer within {timeout:.0f}s')
 
         response = future.result()
         ret = getattr(response, 'ret', 0)
         if ret != 0:
             raise Lite6Error(
-                f'/{self.ns}/{name} refused the command: ret={ret} '
+                f'{self.ns}/{name} refused the command: ret={ret} '
                 f'({getattr(response, "message", "")!r}). '
-                f'Check mode/state with `ros2 topic echo /{self.ns}/robot_states --once`, '
+                f'Check mode/state with `ros2 topic echo {self.ns}/robot_states --once`, '
                 f'and the arm itself in UFACTORY Studio.')
         return response
 
@@ -164,11 +164,11 @@ class Lite6Client(Node):
 
     def wait_for_joint_state(self, timeout: float = 5.0) -> JointState:
         """Block until a JointState arrives (the driver publishes continuously)."""
-        return self._wait_for('_joint_state', f'/{self.ns}/joint_states', timeout)
+        return self._wait_for('_joint_state', f'{self.ns}/joint_states', timeout)
 
     def wait_for_robot_state(self, timeout: float = 5.0) -> RobotMsg:
         """Block until a RobotMsg arrives. This is where mode/state/err live."""
-        return self._wait_for('_robot_state', f'/{self.ns}/robot_states', timeout)
+        return self._wait_for('_robot_state', f'{self.ns}/robot_states', timeout)
 
     def _wait_for(self, attr: str, topic: str, timeout: float):
         deadline = time.monotonic() + timeout
@@ -200,7 +200,7 @@ class Lite6Client(Node):
         mode/state change landed and still describes the old situation.
         """
         self._robot_state = None
-        return self._wait_for('_robot_state', f'/{self.ns}/robot_states', timeout)
+        return self._wait_for('_robot_state', f'{self.ns}/robot_states', timeout)
 
     def require_position_mode(self, timeout: float = 5.0) -> None:
         """Fail early, with the actual reason, if joint commands cannot work.

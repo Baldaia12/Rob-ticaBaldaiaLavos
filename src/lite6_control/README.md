@@ -24,10 +24,12 @@ before the real arm" is possible. **Write your lab code against it.**
 | `move_joints_demo.py` | `lab driver` | self-contained driver-API example, nothing hidden in a helper |
 | `lite6_client.py` | `lab driver` | the reusable `Lite6Client` class to import |
 | `jog_demo.py` | `lab driver` | one joint at a time, built on `Lite6Client` |
+| `move_joints_traj_demo.py` | `lab sim`, `lab real` | the simplest move: one fixed joint target over `ros2_control` — no MoveIt, no driver API |
 
 ## Running
 
-Every node here except `joint_echo` uses the driver API, so terminal 1 is:
+Every node here except `joint_echo` and `move_joints_traj_demo` uses the driver
+API, so terminal 1 is:
 
 ```bash
 lab driver 192.168.1.xxx
@@ -59,9 +61,19 @@ entry point, a changed `package.xml`/`setup.py`, or a new package — and re-sou
 
 ## Writing your own
 
-**For the simulation pipeline, nothing here is a template** — every node except
-`joint_echo` speaks the driver API, which Gazebo does not provide. Write against
-`ros2_control` instead:
+**For the simulation pipeline, start from `move_joints_traj_demo.py`** — every
+other node except `joint_echo` speaks the driver API, which Gazebo does not
+provide. It runs unchanged in Gazebo and on the arm:
+
+```bash
+lab sim
+```
+
+```bash
+ros2 run lite6_control move_joints_traj_demo --dry-run
+```
+
+It writes against `ros2_control`:
 
 ```
 /lite6_traj_controller/follow_joint_trajectory   control_msgs/action/FollowJointTrajectory

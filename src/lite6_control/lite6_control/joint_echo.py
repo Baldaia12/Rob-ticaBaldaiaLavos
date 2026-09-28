@@ -22,7 +22,8 @@ class JointEcho(Node):
         super().__init__('joint_echo')
 
         # Parameters are how you configure a node without editing it.
-        self.declare_parameter('namespace', 'ufactory')
+        #self.declare_parameter('namespace', '/ufactory')
+        self.declare_parameter('namespace', '')
         self.declare_parameter('rate_hz', 2.0)
         self.declare_parameter('degrees', False)
 
@@ -32,12 +33,12 @@ class JointEcho(Node):
 
         self._latest = None
         self.create_subscription(
-            JointState, f'/{namespace}/joint_states', self._on_joint_state, 10)
+            JointState, f'{namespace}/joint_states', self._on_joint_state, 10)
 
         # Print on a timer rather than on every message: the driver publishes
         # far faster than you can read.
         self.create_timer(period, self._print)
-        self.get_logger().info(f'listening on /{namespace}/joint_states')
+        self.get_logger().info(f'listening on {namespace}/joint_states')
 
     def _on_joint_state(self, msg: JointState) -> None:
         self._latest = msg
