@@ -168,10 +168,12 @@ ros2 topic echo /ufactory/robot_states --once
 | `joint_echo` | anything | minimal subscriber: subscribe, spin, print |
 | `move_joints_demo` | `lab driver` | self-contained; the driver API, read and command |
 | `jog_demo` | `lab driver` | one joint at a time, via the reusable `Lite6Client` |
+| `fk_check` | `lab sim`, `lab real` | Labwork 1, from `src/lite6_kinematics`: you implement the forward kinematics, it checks them against the model and the robot — see [its README](src/lite6_kinematics/README.md) |
 
-All three use the driver API, so they need `lab driver`. **The node you run in the
-simulation pipeline is one you write yourself**, against the trajectory action
-above.
+The three `lite6_control` nodes use the driver API, so they need `lab driver`.
+**The node you run in the simulation pipeline is one you write yourself**, against
+the trajectory action above. `fk_check` is the one provided exception: it uses that
+action, so it runs in Gazebo first and then on the arm.
 
 Start your own package in `src/`:
 
@@ -307,6 +309,7 @@ docker/ros_setup.sh     Step 7 of the handout, sourced by every shell
 docker/start-display    WSLg / VNC / external X
 .devcontainer/          VS Code "Reopen in Container"
 src/lite6_control/      worked example ROS 2 Python package
+src/lite6_kinematics/   Labwork 1: forward kinematics (template + checker)
 src/                    YOUR packages     (= ~/dev_ws/src)
 shared/                 files in and out  (= ~/shared)
 ```
