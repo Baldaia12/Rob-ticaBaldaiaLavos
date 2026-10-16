@@ -168,12 +168,13 @@ ros2 topic echo /ufactory/robot_states --once
 | `joint_echo` | anything | minimal subscriber: subscribe, spin, print |
 | `move_joints_demo` | `lab driver` | self-contained; the driver API, read and command |
 | `jog_demo` | `lab driver` | one joint at a time, via the reusable `Lite6Client` |
-| `fk_check` | `lab sim`, `lab real` | Labwork 1, from `src/lite6_kinematics`: you implement the forward kinematics, it checks them against the model and the robot — see [its README](src/lite6_kinematics/README.md) |
+| `fk_node`, `fk_check` | `lab sim`, `lab real` | Labwork 1, from `src/lite6_kinematics`: you write `fk_node` (joint states in, end-effector pose out); `fk_check` checks it against the model and the robot — see [its README](src/lite6_kinematics/README.md) |
 
 The three `lite6_control` nodes use the driver API, so they need `lab driver`.
 **The node you run in the simulation pipeline is one you write yourself**, against
-the trajectory action above. `fk_check` is the one provided exception: it uses that
-action, so it runs in Gazebo first and then on the arm.
+the trajectory action above. The `lite6_kinematics` nodes are the exception: `fk_node`
+reads `/joint_states` and `fk_check` uses that action, so both run in Gazebo first and
+then on the arm.
 
 Start your own package in `src/`:
 
