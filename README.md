@@ -15,7 +15,9 @@ that time is spent once, by `docker build`, and never again.
 ## First time
 
 Docker Desktop, on the WSL 2 based engine. It installs its own WSL distribution —
-you do **not** need `wsl --install`. No GPU required.
+you do **not** need `wsl --install`, unless Docker Desktop reports
+[*Virtualization support not detected*](#virtualization-support-not-detected).
+No GPU required.
 
 ```powershell
 winget install -e --id Docker.DockerDesktop
@@ -43,6 +45,20 @@ Put your assigned `ROS_DOMAIN_ID` in `.env`, then build — once, mostly downloa
 
 `doctor` checks ROS, the xarm packages, the display, the GL renderer and both
 workspaces. Run it before asking anyone anything.
+
+Last, build the packages in `.\src` (`lite6_control` and anything of yours) —
+inside the container, once:
+
+```powershell
+.\lab.ps1 shell
+```
+
+```bash
+lab build
+```
+
+Then `exit` and open a new `.\lab.ps1 shell`. Until this is done,
+`ros2 run lite6_control ...` answers `Package 'lite6_control' not found`.
 
 Every terminal after that is `.\lab.ps1 shell`, which drops you into the same
 running container. Inside, `lab` is the menu. `.\lab.ps1 down` stops everything;
@@ -282,10 +298,12 @@ which is what `lab overlay-xarm` is for if you ever need to modify `xarm_ros2`.
 |---|---|
 | `Docker is not installed (or not on PATH)` | Install it. If you just did, `lab.ps1` re-reads PATH itself — this means it really is absent. |
 | `the engine is not responding` | Docker Desktop installed but not started. Launch it, wait for the whale to settle. |
+| Docker Desktop: `Virtualization support not detected` | See [below](#virtualization-support-not-detected). |
 | Build fails | The **first** error matters, not the last. Scroll up. |
 | Build killed / machine freezes | Lower `COLCON_JOBS` in `.env`, then `.\lab.ps1 rebuild`. |
 | `no action server on /lite6_traj_controller/...` | You are on `lab driver`, which has no `controller_manager`. Use `lab sim` or `lab real`. |
 | Service calls ignored, arm does not move | Two owners. `ros2 topic echo /ufactory/robot_states --once` — mode 1 means `ros2_control` has it. |
+| `Package 'lite6_control' not found` | Not built yet: `lab build`, then a new `.\lab.ps1 shell`. A shell opened *before* the build does not see it either. |
 | `ros2: command not found` inside | A shell that skipped `~/.bashrc`. Run `bash -l`. |
 | RViz/Gazebo open nothing | `lab doctor`, then `DISPLAY_MODE=vnc` + `.\lab.ps1 restart`. |
 | Gazebo hangs for minutes on first launch | Normal — Fuel models and shaders, cached in a volume, once only. |
@@ -294,6 +312,47 @@ which is what `lab overlay-xarm` is for if you ever need to modify `xarm_ros2`.
 | `xarm_ros2` upstream moved | `.\lab.ps1 rebuild-xarm` — fresh recursive clone and build. |
 
 Container logs are UTC; your Windows clock is local. Timestamps will look offset.
+
+### Virtualization support not detected
+
+Docker Desktop runs Linux in a small virtual machine, and Windows cannot start it.
+Work down this list; each step ends in a **full restart** (Restart, not Shut down).
+
+**1. Is virtualization on in the firmware?** Task Manager → Performance → CPU →
+*Virtualization*. If it says **Disabled**, turn it on in the BIOS/UEFI setup (key at
+boot: usually F2, F10, F12, Del or Esc). It is called **Intel VT-x** /
+*Intel Virtualization Technology* or **AMD-V** / *SVM Mode*, usually under
+*Advanced*, *CPU Configuration* or *Security*. Save, restart.
+
+**2. Are the Windows features on?** PowerShell **as Administrator**:
+
+```powershell
+wsl --install --no-distribution
+```
+
+This enables *Virtual Machine Platform* and *Windows Subsystem for Linux* without
+installing a Linux distribution (Docker brings its own). Restart. Then:
+
+```powershell
+wsl --update
+```
+
+**3. Is the hypervisor allowed to start?** Something (an old VirtualBox, a tuning
+tool) may have switched it off. PowerShell as Administrator:
+
+```powershell
+bcdedit /set hypervisorlaunchtype auto
+```
+
+Restart.
+
+**Check:** `systeminfo` in a terminal. At the bottom, *"A hypervisor has been
+detected"* means all is well — start Docker Desktop again. A list of *Hyper-V
+Requirements* with a **No** in it names the step that is still missing.
+
+Windows 11 **Home** is fine — WSL 2 does not need Hyper-V. The one case with no fix
+on your side: Windows itself running inside a virtual machine (some university
+remote desktops) without nested virtualization. Use a physical PC.
 
 ---
 
