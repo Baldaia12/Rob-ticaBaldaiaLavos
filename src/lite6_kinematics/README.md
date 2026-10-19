@@ -39,8 +39,24 @@ in `link_base` on `/lite6_fk/pose` (`geometry_msgs/PoseStamped`, position in
 metres, orientation as a quaternion). Its `header.stamp` is the stamp of the
 joint state it was computed from.
 
-All commands below run inside the container, in a shell opened as described in
-the top-level README.
+## Before you start: the container
+
+Every command below is typed **inside the container**. Start it once, from the
+repository root, in PowerShell:
+
+```powershell
+.\lab.ps1 up
+```
+
+Each terminal the steps ask for is a new PowerShell window in which you run:
+
+```powershell
+.\lab.ps1 shell
+```
+
+The prompt changes to `ros@lab0:~/dev_ws$`. Only there do `lab`, `ros2` and
+`python3 -m pytest` exist: in a plain PowerShell window (prompt `PS C:\...`) they
+are not found.
 
 ## 1. Tests
 
