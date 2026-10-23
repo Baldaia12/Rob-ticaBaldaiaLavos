@@ -1,3 +1,11 @@
+# LW0 Parte 2 — projeto Python do grupo (Robotics 2026/2027, Lite 6)
+
+Bernardo Pereira (2022219048) · João Lavos (<2021222529>)
+
+Esta pasta é `lw0/parte2/` do repositório https://github.com/Baldaia12/Rob-ticaBaldaiaLavos.
+Todos os comandos das secções 1–4 correm **a partir desta pasta**
+(`cd Rob-ticaBaldaiaLavos\lw0\parte2`).
+
 ## 1. Recriar o ambiente a partir do zero (Python ≥ 3.10)
 
 Linux / macOS:
@@ -71,3 +79,33 @@ python scripts/lifecycle_tests.py
 
 Alvo: `target:` em `config/robot.yaml` (`sim` ou `lab`).
 Contra o robô real: só com autorização do docente e um membro na paragem de emergência.
+
+## 5. Nível avançado (ROS 2 Jazzy + MoveIt 2 + Gazebo Harmonic) — Via 1, Docker
+
+O ambiente ROS 2 é a **raiz deste repositório** (cópia do ramo `windows` de
+https://github.com/cazevedo/robotica). Windows, PowerShell, com o Docker Desktop
+instalado e aberto, a partir da raiz `Rob-ticaBaldaiaLavos`:
+
+```
+copy .env.example .env
+.\lab.ps1 build
+.\lab.ps1 up
+.\lab.ps1 doctor
+```
+
+O `build` faz-se uma vez (descarrega e compila tudo). Depois, em cada sessão:
+`.\lab.ps1 up` e, em cada terminal, `.\lab.ps1 shell` (fica `ros@lab0:~/dev_ws$`).
+Lá dentro, os testes do §C.5 são `lab test 1` … `lab test 7`
+(o Teste 1 precisa de `lab test 1b` num segundo terminal). O PDF do Teste 4 aparece
+em `shared/` (não versionada); as evidências usadas no relatório estão em
+`docs/evidencias/`. Para parar: `.\lab.ps1 down`.
+
+Se o Gazebo não mostrar o braço na primeira vez (`Failed to download model`),
+parar com Ctrl+C e repetir: os modelos ficam em cache.
+
+A instalação de raiz (Apêndice C da ficha, opcional) também foi feita numa VM
+Ubuntu 24.04; não é necessária para nada neste projeto.
+
+## Etiquetas entregues
+
+`delivery-1` (LW0 + LW1 + LW2), `delivery-2`, `delivery-3`.
